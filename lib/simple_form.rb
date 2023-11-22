@@ -185,6 +185,12 @@ module SimpleForm
       @wrappers[name.to_s] or raise WrapperNotFound, "Couldn't find wrapper with name #{name}"
     end
 
+    def dup
+      result = super
+      result.wrappers = wrappers.transform_values(&:dup)
+      result
+    end
+
     # Raised when fails to find a given wrapper name
     class WrapperNotFound < StandardError
     end
@@ -242,8 +248,10 @@ module SimpleForm
   # to create a fresh initializer with all configuration values.
   def self.setup(context: :default)
     config = context == :default ? Config.new : @@contexts[:default]&.dup
+    # config = Config.new
     config ||= Config.new
     @@contexts[context] = config
+
     @@configured = true
     yield config
   end
